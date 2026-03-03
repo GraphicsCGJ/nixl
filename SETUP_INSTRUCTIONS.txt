@@ -1,0 +1,150 @@
+================================================================================
+NIXL HOST INSTALLATION - 호스트에 Docker 없이 설치하기
+================================================================================
+
+위치: /home/gj/nixl
+OS: Ubuntu 24.04 LTS
+
+생성된 파일:
+  ✓ install-deps.sh       - 시스템 의존성 설치 (sudo 필요)
+  ✓ build.sh              - NIXL/NIXLBench 빌드 및 설치 (sudo 불필요)
+  ✓ QUICKSTART.md         - 빠른 시작 가이드 (2단계)
+  ✓ HOST_SETUP.md         - 상세 설명서
+
+================================================================================
+빠른 설치 (2단계, 약 45분, sudo 불필요!)
+================================================================================
+
+1. 시스템 의존성 설치 (선택사항, 10-15분, sudo 필요)
+   $ cd /home/gj/nixl
+   $ sudo ./install-deps.sh
+
+   참고: 이미 설치된 경우 스킵 가능
+
+2. NIXL 빌드 및 설치 (일반 사용자, 30-45분)
+   $ ./build.sh
+
+   자동으로:
+   - Python virtual environment 생성
+   - 필요한 패키지 설치
+   - NIXL 라이브러리 빌드 및 설치
+   - NIXLBench 도구 빌드 및 설치
+
+   설치 위치:
+   - ~/.local/nixl
+   - ~/.local/nixlbench
+
+3. 환경 변수 설정
+   ~/.bashrc 또는 ~/.zshrc에 추가:
+
+   export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
+   export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+   적용:
+   $ source ~/.bashrc
+
+================================================================================
+환경 설정
+================================================================================
+
+~/.bashrc 또는 ~/.zshrc에 추가:
+
+export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
+export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+적용:
+$ source ~/.bashrc
+
+================================================================================
+첫 벤치마크 실행
+================================================================================
+
+1. ETCD 서버 시작 (별도 터미널)
+   $ docker run -d --name etcd-server -p 2379:2379 quay.io/coreos/etcd:v3.5.18
+
+2. 기본 벤치마크
+   $ sleep 2 && timeout 30 nixlbench \
+     --etcd_endpoints http://localhost:2379 \
+     --backend POSIX \
+     --filepath /tmp/nixl_test \
+     --num_iter 10 \
+     --warmup_iter 2
+
+================================================================================
+문서 참조
+================================================================================
+
+- QUICKSTART.md   : 빠른 시작 (이 파일과 유사하지만 더 간결)
+- HOST_SETUP.md   : 상세 설명
+  * 시스템 요구사항
+  * 상세 설치 과정
+  * ETCD 설정
+  * 벤치마크 옵션
+  * 성능 최적화
+  * 트러블슈팅
+
+- benchmark/nixlbench/README.md : NIXLBench 완전 설명서
+
+================================================================================
+주요 설치 위치
+================================================================================
+
+NIXL:           ~/.local/nixl/
+NIXLBench:      ~/.local/nixlbench/
+빌드 아티팩트:  ~/nixl/build/
+                ~/nixl/benchmark/nixlbench/build/
+
+================================================================================
+문제 발생 시
+================================================================================
+
+1. Meson 설정 오류
+   $ cd /home/gj/nixl && rm -rf build && ./build.sh
+
+2. CUDA 찾을 수 없음 (GPU 필요 시)
+   $ export PATH=/usr/local/cuda/bin:$PATH
+   $ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+3. 라이브러리 찾을 수 없음
+   $ which nixlbench
+   $ ldd $HOME/.local/nixlbench/bin/nixlbench
+
+4. 상세 트러블슈팅
+   → HOST_SETUP.md의 "트러블슈팅" 섹션 참조
+
+================================================================================
+유용한 명령어
+================================================================================
+
+# 설치 확인
+$ which nixlbench
+$ nixlbench --help
+
+# 바이너리 확인
+$ ls -la ~/.local/nixlbench/bin/
+$ ls -la ~/.local/nixl/bin/
+
+# 라이브러리 확인
+$ ls -la ~/.local/nixl/lib/x86_64-linux-gnu/
+
+# 동적 링크 정보
+$ ldd ~/.local/nixlbench/bin/nixlbench
+
+================================================================================
+더 알아보기
+================================================================================
+
+GitHub: https://github.com/ai-dynamo/nixl
+ETCD: https://etcd.io/docs/
+UCX: https://openucx.readthedocs.io/
+
+================================================================================
+주요 특징
+================================================================================
+
+✓ 모든 설치가 홈 디렉토리에 됨 → sudo 불필요 (install-deps 제외)
+✓ 시스템 전체에 영향을 주지 않음
+✓ 다른 사용자와 독립적으로 설치 가능
+✓ 빌드 스크립트가 자동으로 설치까지 처리
+
+================================================================================
