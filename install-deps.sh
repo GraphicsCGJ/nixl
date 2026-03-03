@@ -23,6 +23,7 @@ apt-get install -y \
   libcpprest-dev etcd-server etcd-client \
   pybind11-dev libclang-dev libcurl4-openssl-dev \
   libssl-dev uuid-dev libxml2-dev zlib1g-dev python3-dev python3-pip \
+  libucx-dev \
   git curl wget
 
 # Install RDMA/InfiniBand packages
@@ -31,8 +32,25 @@ apt-get install -y \
   autoconf libnuma-dev librdmacm-dev ibverbs-providers \
   libibverbs-dev rdma-core ibverbs-utils libibumad-dev
 
+# Install etcd-cpp-api (required for metadata exchange)
+echo "[4/5] Building and installing etcd-cpp-api..."
+cd /tmp
+if [ ! -d "etcd-cpp-apiv3" ]; then
+  git clone --depth 1 https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3.git
+fi
+cd etcd-cpp-apiv3
+sed -i '/^find_dependency(cpprestsdk)$/d' etcd-cpp-api-config.in.cmake 2>/dev/null || true
+mkdir -p build && cd build
+cmake .. \
+  -DBUILD_ETCD_CORE_ONLY=ON \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr/local
+make -j$(nproc) && make install
+ldconfig
+echo "  ✓ etcd-cpp-api installed"
+
 # Install Python package manager (uv) - optional
-echo "[4/4] uv (Python package manager) installation..."
+echo "[5/5] uv (Python package manager) installation..."
 if command -v uv &> /dev/null; then
   echo "  ✓ uv is already installed"
 else
