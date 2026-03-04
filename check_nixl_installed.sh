@@ -4,8 +4,11 @@
 # Check if NIXL is properly installed (Python package + C++ bindings)
 
 # Installation paths (same as build.sh defaults)
-NIXL_INSTALL_PREFIX="${NIXL_INSTALL_PREFIX:-$HOME/.local/nixl}"
-NIXL_LIB_PATH="$NIXL_INSTALL_PREFIX/lib/x86_64-linux-gnu"
+NIXL_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[ -f "$NIXL_SOURCE_DIR/env.sh" ] && source "$NIXL_SOURCE_DIR/env.sh"
+NIXL_INSTALL_PREFIX="${NIXL_INSTALL_PREFIX:-$NIXL_SOURCE_DIR/install/nixl}"
+ARCH=$(uname -m); [ "$ARCH" = "arm64" ] && ARCH="aarch64"
+NIXL_LIB_PATH="$NIXL_INSTALL_PREFIX/lib/$ARCH-linux-gnu"
 NIXL_BIN_PATH="$NIXL_INSTALL_PREFIX/bin"
 
 check_nixl_installed() {

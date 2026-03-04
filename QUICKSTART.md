@@ -8,6 +8,8 @@ Docker 대신 **호스트에 직접 설치**하는 방법입니다. 약 30-60분
 - ✅ NIXL 소스 코드 다운로드 완료
 - ✅ `install-deps.sh` - 시스템 의존성 설치 스크립트
 - ✅ `build.sh` - 빌드 스크립트
+- ✅ `check_nixl_installed.sh` - 설치 확인 스크립트
+- ✅ `run_nixlbench.sh` - 벤치마크 실행 스크립트
 - ✅ `HOST_SETUP.md` - 상세 설명서
 
 ## 🚀 빠른 설치 (4단계)
@@ -15,7 +17,7 @@ Docker 대신 **호스트에 직접 설치**하는 방법입니다. 약 30-60분
 ### 1️⃣ 시스템 의존성 설치 (sudo 필요, 10-15분)
 
 ```bash
-cd /home/gj/nixl
+cd ~/nixl
 sudo ./install-deps.sh
 ```
 
@@ -43,64 +45,69 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ### 3️⃣ NIXL 빌드 및 설치 (일반 사용자, 30-45분)
 
 ```bash
-cd /home/gj/nixl
+cd ~/nixl
 ./build.sh
 ```
 
 **자동으로 수행:**
-1. Python virtual environment 생성
+1. Python virtual environment 생성 (`.venv/`)
 2. Python 패키지 설치 (meson, pybind11, torch 등)
 3. NIXL 라이브러리 빌드 및 설치
 4. NIXLBench 도구 빌드 및 설치
+5. `env.sh` 자동 생성
 
-설치 위치:
-- NIXL:       `~/.local/nixl`
-- NIXLBench:  `~/.local/nixlbench`
+**설치 위치 (모두 `~/nixl` 안에 위치):**
+- NIXL:      `~/nixl/install/nixl/`
+- NIXLBench: `~/nixl/install/nixlbench/`
 
-## 🔧 환경 설정
+### 4️⃣ 환경 설정
 
-`~/.bashrc` 또는 `~/.zshrc`에 추가:
+빌드 후 자동 생성된 `env.sh`를 source합니다:
 
 ```bash
-export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
-export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+source ~/nixl/env.sh
 ```
 
-적용:
+매 세션마다 자동 적용하려면 `~/.bashrc`에 추가:
+
 ```bash
+echo 'source ~/nixl/env.sh' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 ## ✅ 설치 확인
 
 ```bash
-# 설치 확인
-which nixlbench
-nixlbench --help
+# 간단 확인 (true/false)
+./check_nixl_installed.sh
 
-# 바이너리 확인
-ls -la /usr/local/nixlbench/bin/
+# 상세 확인
+./check_nixl_installed.sh -v
 ```
 
 ## 🎯 첫 벤치마크 실행
 
-### ETCD 서버 시작 (별도 터미널)
-
 ```bash
-docker run -d --name etcd-server \
-  -p 2379:2379 \
-  quay.io/coreos/etcd:v3.5.18
+# POSIX 스토리지 벤치마크 (가장 간단, ETCD 불필요)
+./run_nixlbench.sh POSIX
+
+# 네트워크 벤치마크 (ETCD 자동 시작, 두 인스턴스 필요)
+./run_nixlbench.sh UCX
+# 다른 터미널에서:
+sleep 3 && ./run_nixlbench.sh UCX
+
+# 도움말
+./run_nixlbench.sh --help
 ```
 
-### 기본 벤치마크 실행
+옵션 전체 설명은 **`option_report.md`** 참조.
+
+## 🗑️ Tear Down
+
+빌드 결과물이 모두 `~/nixl` 안에 있으므로, 디렉토리 하나만 삭제하면 완전히 제거됩니다:
 
 ```bash
-sleep 2 && timeout 30 nixlbench \
-  --etcd_endpoints http://localhost:2379 \
-  --backend POSIX \
-  --filepath /tmp/nixl_test \
-  --num_iter 10 \
-  --warmup_iter 2
+rm -rf ~/nixl
 ```
 
 ## 📚 더 알아보기
@@ -109,7 +116,6 @@ sleep 2 && timeout 30 nixlbench \
 
 - **시스템 요구사항** 확인
 - **트러블슈팅** 가이드
-- **벤치마크 옵션** 설명
 - **성능 최적화** 팁
 - **다양한 백엔드** 사용법
 
@@ -117,7 +123,7 @@ sleep 2 && timeout 30 nixlbench \
 
 1. **Meson 에러**: `rm -rf build && ./build.sh` 다시 실행
 2. **CUDA 찾을 수 없음**: CUDA 경로 설정 확인
-3. **라이브러리 찾을 수 없음**: `sudo ldconfig` 실행
+3. **라이브러리 찾을 수 없음**: `source ./env.sh` 재실행
 4. **ETCD 연결 안 됨**: Docker 설치 및 ETCD 서버 시작 확인
 
 자세한 트러블슈팅은 `HOST_SETUP.md`의 **트러블슈팅** 섹션 참조
@@ -125,15 +131,22 @@ sleep 2 && timeout 30 nixlbench \
 ## 📝 주요 파일
 
 ```
-/home/gj/nixl/
-├── install-deps.sh      ← 시스템 의존성 설치 (sudo)
-├── build.sh             ← NIXL/NIXLBench 빌드 (일반 사용자)
-├── QUICKSTART.md        ← 이 파일
-├── HOST_SETUP.md        ← 상세 설명서
-├── benchmark/
+~/nixl/
+├── install-deps.sh          ← 시스템 의존성 설치 (sudo)
+├── build.sh                 ← NIXL/NIXLBench 빌드 (일반 사용자)
+├── env.sh                   ← 환경 변수 (빌드 후 자동 생성)
+├── check_nixl_installed.sh  ← 설치 확인
+├── run_nixlbench.sh         ← 벤치마크 실행
+├── option_report.md         ← 옵션 전체 설명
+├── QUICKSTART.md            ← 이 파일
+├── HOST_SETUP.md            ← 상세 설명서
+├── install/                 ← 빌드 결과물 (빌드 후 생성)
+│   ├── nixl/
 │   └── nixlbench/
-│       └── README.md    ← NIXLBench 완전 설명서
-└── build/               ← 빌드 아티팩트 (자동 생성)
+├── .venv/                   ← Python 가상 환경 (빌드 후 생성)
+└── benchmark/
+    └── nixlbench/
+        └── README.md        ← NIXLBench 완전 설명서
 ```
 
 ## 🔗 유용한 링크
@@ -145,4 +158,4 @@ sleep 2 && timeout 30 nixlbench \
 ---
 
 **예상 소요 시간**: 30-60분 (인터넷 속도에 따라 다름)
-**마지막 업데이트**: 2025년 3월
+**마지막 업데이트**: 2026년 3월
