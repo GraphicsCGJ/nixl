@@ -23,3 +23,8 @@ cufile.log
 
 # Asio
 subprojects/asio-*
+
+# Prometheus-cpp (auto-cloned by meson wrap)
+subprojects/prometheus-cpp/
+
+install/**

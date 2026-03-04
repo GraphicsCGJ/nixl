@@ -20,6 +20,18 @@ echo "  NIXLBench Install Prefix: $NIXLBENCH_INSTALL_PREFIX"
 echo "  Build Type: $BUILD_TYPE"
 echo ""
 
+# Clean previous install artifacts (headers, libraries, binaries)
+echo "[0/5] Cleaning previous build artifacts..."
+rm -rf \
+  "$NIXL_INSTALL_PREFIX/include" \
+  "$NIXL_INSTALL_PREFIX/lib" \
+  "$NIXL_INSTALL_PREFIX/bin" \
+  "$NIXLBENCH_INSTALL_PREFIX/include" \
+  "$NIXLBENCH_INSTALL_PREFIX/lib" \
+  "$NIXLBENCH_INSTALL_PREFIX/bin"
+echo "    ✓ Cleaned"
+echo ""
+
 # Create virtual environment if needed
 if [ ! -d ".venv" ]; then
   echo "[1/5] Creating Python virtual environment..."
@@ -44,6 +56,12 @@ echo "    ℹ Next: sudo ninja install (requires root)"
 echo "[3/5] Installing NIXL..."
 ninja install
 echo "    ✓ NIXL installed to: $NIXL_INSTALL_PREFIX"
+
+# Install NIXL Python package into venv (requires the build dir to exist)
+echo "    Installing NIXL Python package..."
+cd "$NIXL_SOURCE_DIR"
+pip install --no-build-isolation -e . --quiet
+echo "    ✓ NIXL Python package installed"
 
 # Build NIXLBench
 echo ""
