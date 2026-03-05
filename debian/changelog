@@ -1,0 +1,7 @@
+nixl (0.9.0-1) unstable; urgency=medium
+
+  * Initial packaging of NIXL 0.9.0.
+  * Uses apt UCX 1.16.0 (no source build required).
+  * Includes libnixl library and nixlbench benchmark tool.
+
+ -- gyujin-choi <gyujin.choi@mangoboost.io>  Wed, 05 Mar 2026 09:00:00 +0900

@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+
+NIXL_BUILDDIR  := $(CURDIR)/obj-nixl
+BENCH_BUILDDIR := $(CURDIR)/obj-nixlbench
+NIXL_STAGING   := $(CURDIR)/debian/nixl-staging
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	meson setup $(NIXL_BUILDDIR) \
+		--prefix=/usr \
+		--libdir=lib \
+		--buildtype=release
+
+override_dh_auto_build:
+	ninja -C $(NIXL_BUILDDIR)
+	DESTDIR=$(NIXL_STAGING) ninja -C $(NIXL_BUILDDIR) install
+	meson setup $(BENCH_BUILDDIR) benchmark/nixlbench \
+		-Dnixl_path=$(NIXL_STAGING)/usr \
+		--prefix=/usr \
+		--buildtype=release
+	ninja -C $(BENCH_BUILDDIR)
+
+override_dh_auto_install:
+	DESTDIR=$(CURDIR)/debian/tmp ninja -C $(NIXL_BUILDDIR) install
+	DESTDIR=$(CURDIR)/debian/tmp ninja -C $(BENCH_BUILDDIR) install
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+	rm -rf $(NIXL_BUILDDIR) $(BENCH_BUILDDIR) $(NIXL_STAGING)
