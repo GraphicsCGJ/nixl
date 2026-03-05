@@ -1,0 +1,7 @@
+# Example binaries and static libs — not packaged
+usr/bin/nixl_etcd_example
+usr/bin/nixl_example
+usr/bin/telemetry_reader
+usr/lib/libetcd_rt.a
+usr/lib/libnixl_worker.a
+usr/lib/libruntime.a

@@ -28,3 +28,18 @@ subprojects/asio-*
 subprojects/prometheus-cpp/
 
 install/**
+
+# Debian build artifacts
+debian/.debhelper/
+debian/debhelper-build-stamp
+debian/files
+debian/tmp/
+debian/*.substvars
+debian/libnixl/
+debian/nixlbench/
+debian/nixl-staging/
+obj-nixl/
+obj-nixlbench/
+
+# nixlbench meson subprojects (auto-fetched)
+benchmark/nixlbench/subprojects/

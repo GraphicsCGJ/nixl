@@ -1,4 +1,6 @@
 usr/lib/lib*.so*
 usr/include
-usr/lib/pkgconfig
-usr/lib/*/plugins
+usr/share/pkgconfig
+usr/lib/plugins
+usr/lib/x86_64-linux-gnu
+usr/lib/python3/dist-packages/nixl_cu12
