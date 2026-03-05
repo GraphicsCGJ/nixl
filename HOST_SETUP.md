@@ -61,36 +61,11 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 #### UCX (통신 라이브러리)
 
-```bash
-# 옵션 1: 시스템 패키지 사용 (권장)
-sudo apt-get install -y libucx-dev
+`install-deps.sh`에서 `libucx-dev` (v1.16.0)를 apt로 자동 설치합니다. 별도 설치 불필요.
 
-# 옵션 2: 소스에서 빌드
-git clone https://github.com/openucx/ucx.git
-cd ucx
-./autogen.sh
-./contrib/configure-release --with-cuda=/usr/local/cuda --enable-mt
-make -j$(nproc) && sudo make install
-```
+#### etcd-cpp-api (메타데이터 교환용)
 
-#### etcd-cpp-api (메타데이터 교환용, 필수)
-
-```bash
-git clone --depth 1 https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3.git
-cd etcd-cpp-apiv3
-
-# CMake 설정에서 cpprestsdk 의존성 제거 (apt로 이미 설치됨)
-sed -i '/^find_dependency(cpprestsdk)$/d' etcd-cpp-api-config.in.cmake
-
-# 빌드 및 설치
-mkdir build && cd build
-cmake .. \
-  -DBUILD_ETCD_CORE_ONLY=ON \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=/usr/local
-make -j$(nproc) && sudo make install
-sudo ldconfig
-```
+`install-deps.sh`에서 소스 빌드 및 설치를 자동으로 처리합니다. 별도 설치 불필요.
 
 ### Step 3: NIXL과 NIXLBench 빌드 및 설치
 
@@ -105,17 +80,21 @@ cd /home/gj/nixl
 3. NIXLBench 도구 빌드 및 설치 (자동)
 
 **설치 위치:**
-- NIXL:       `~/.local/nixl`
-- NIXLBench:  `~/.local/nixlbench`
+- NIXL:       `~/nixl/install/nixl/`
+- NIXLBench:  `~/nixl/install/nixlbench/`
 
 ### Step 4: 환경 변수 설정
 
-```bash
-# ~/.bashrc 또는 ~/.zshrc에 추가
-export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
-export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+빌드 완료 후 자동 생성된 `env.sh`를 사용합니다:
 
-# 설정 적용
+```bash
+source ~/nixl/env.sh
+```
+
+매 세션마다 자동 적용하려면 `~/.bashrc`에 추가:
+
+```bash
+echo 'source ~/nixl/env.sh' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -124,10 +103,15 @@ source ~/.bashrc
 ### 설치 디렉토리 구조
 
 ```
-/home/gj/nixl/
+~/nixl/
 ├── install-deps.sh          # 시스템 의존성 설치 (sudo 필요)
 ├── build.sh                 # NIXL/NIXLBench 빌드 (일반 사용자)
+├── env.sh                   # 환경 변수 (빌드 후 자동 생성)
+├── debian/                  # .deb 패키징 설정
 ├── build/                   # NIXL 빌드 아티팩트
+├── install/
+│   ├── nixl/                # NIXL 설치 결과물
+│   └── nixlbench/           # NIXLBench 설치 결과물
 ├── benchmark/
 │   └── nixlbench/
 │       ├── build/           # NIXLBench 빌드 아티팩트
@@ -138,8 +122,8 @@ source ~/.bashrc
 ### 설치 위치
 
 기본 설치 위치 (sudo 불필요):
-- **NIXL**: `~/.local/nixl/`
-- **NIXLBench**: `~/.local/nixlbench/`
+- **NIXL**: `~/nixl/install/nixl/`
+- **NIXLBench**: `~/nixl/install/nixlbench/`
 
 커스텀 위치로 설치하려면:
 
@@ -354,11 +338,11 @@ nvcc --version
 ### 라이브러리를 찾을 수 없음
 
 ```bash
-# 라이브러리 캐시 업데이트
-sudo ldconfig
+# 환경 변수 재적용
+source ~/nixl/env.sh
 
 # 동적 링크 정보 확인
-ldd /usr/local/nixlbench/bin/nixlbench
+ldd ~/nixl/install/nixlbench/bin/nixlbench
 ```
 
 ### GPU 접근 오류
@@ -418,11 +402,11 @@ rm -rf .venv
 
 ```bash
 # 설치된 바이너리 확인
-ls -la ~/.local/nixlbench/bin/
-ls -la ~/.local/nixl/bin/
+ls -la ~/nixl/install/nixlbench/bin/
+ls -la ~/nixl/install/nixl/bin/
 
 # 라이브러리 확인
-ls -la ~/.local/nixl/lib/x86_64-linux-gnu/
+ls -la ~/nixl/install/nixl/lib/
 
 # PATH에 추가되었는지 확인
 which nixlbench
@@ -459,6 +443,6 @@ sleep 2 && timeout 30 nixlbench \
 
 ---
 
-**작성일**: 2025년 3월
-**NIXL 버전**: 최신 (main branch)
+**작성일**: 2026년 3월
+**NIXL 버전**: 0.9.0
 **테스트 환경**: Ubuntu 24.04 LTS

@@ -31,29 +31,26 @@ OS: Ubuntu 24.04 LTS
    - NIXLBench 도구 빌드 및 설치
 
    설치 위치:
-   - ~/.local/nixl
-   - ~/.local/nixlbench
+   - ~/nixl/install/nixl/
+   - ~/nixl/install/nixlbench/
 
 3. 환경 변수 설정
-   ~/.bashrc 또는 ~/.zshrc에 추가:
+   빌드 후 자동 생성된 env.sh를 사용:
 
-   export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
-   export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+   $ source ~/nixl/env.sh
 
-   적용:
-   $ source ~/.bashrc
+   매 세션 자동 적용:
+   $ echo 'source ~/nixl/env.sh' >> ~/.bashrc
 
 ================================================================================
 환경 설정
 ================================================================================
 
-~/.bashrc 또는 ~/.zshrc에 추가:
+빌드 후 자동 생성된 env.sh를 사용:
+$ source ~/nixl/env.sh
 
-export PATH=$HOME/.local/nixlbench/bin:$HOME/.local/nixl/bin:$PATH
-export LD_LIBRARY_PATH=$HOME/.local/nixlbench/lib:$HOME/.local/nixl/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-
-적용:
-$ source ~/.bashrc
+매 세션 자동 적용:
+$ echo 'source ~/nixl/env.sh' >> ~/.bashrc
 
 ================================================================================
 첫 벤치마크 실행
@@ -89,8 +86,8 @@ $ source ~/.bashrc
 주요 설치 위치
 ================================================================================
 
-NIXL:           ~/.local/nixl/
-NIXLBench:      ~/.local/nixlbench/
+NIXL:           ~/nixl/install/nixl/
+NIXLBench:      ~/nixl/install/nixlbench/
 빌드 아티팩트:  ~/nixl/build/
                 ~/nixl/benchmark/nixlbench/build/
 
@@ -107,7 +104,7 @@ NIXLBench:      ~/.local/nixlbench/
 
 3. 라이브러리 찾을 수 없음
    $ which nixlbench
-   $ ldd $HOME/.local/nixlbench/bin/nixlbench
+   $ ldd ~/nixl/install/nixlbench/bin/nixlbench
 
 4. 상세 트러블슈팅
    → HOST_SETUP.md의 "트러블슈팅" 섹션 참조
@@ -121,11 +118,11 @@ $ which nixlbench
 $ nixlbench --help
 
 # 바이너리 확인
-$ ls -la ~/.local/nixlbench/bin/
-$ ls -la ~/.local/nixl/bin/
+$ ls -la ~/nixl/install/nixlbench/bin/
+$ ls -la ~/nixl/install/nixl/bin/
 
 # 라이브러리 확인
-$ ls -la ~/.local/nixl/lib/x86_64-linux-gnu/
+$ ls -la ~/nixl/install/nixl/lib/
 
 # 동적 링크 정보
 $ ldd ~/.local/nixlbench/bin/nixlbench
