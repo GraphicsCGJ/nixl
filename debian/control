@@ -6,6 +6,7 @@ Build-Depends: debhelper-compat (= 13),
  meson (>= 0.64),
  ninja-build,
  pkg-config,
+ cmake,
  libucx-dev,
  libgtest-dev,
  pybind11-dev,
@@ -21,12 +22,14 @@ Build-Depends: debhelper-compat (= 13),
  libibverbs-dev,
  libhwloc-dev,
  libgflags-dev,
- python3-dev
+ python3-dev,
+ libetcd-cpp-apiv3-dev
 Standards-Version: 4.6.0
 
 Package: libnixl
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libetcd-cpp-apiv3-dev
 Description: NVIDIA Inference Xfer Library
  NIXL is a high-performance data transfer library for AI inference workloads.
  Provides UCX-based RDMA transfer support for GPU memory.
@@ -36,3 +39,6 @@ Architecture: any
 Depends: libnixl (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: NIXLBench benchmark tool
  Benchmarking tool for measuring NIXL transfer performance across nodes.
+ .
+ Requires an etcd server endpoint for multi-node coordination.
+ Start etcd via Docker and set ETCD_ENDPOINTS=http://<host>:2379.
