@@ -43,3 +43,4 @@ obj-nixlbench/
 
 # nixlbench meson subprojects (auto-fetched)
 benchmark/nixlbench/subprojects/
+dist/**

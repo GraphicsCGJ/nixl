@@ -23,6 +23,7 @@ Build-Depends: debhelper-compat (= 13),
  libhwloc-dev,
  libgflags-dev,
  python3-dev,
+ git,
  libetcd-cpp-apiv3-dev
 Standards-Version: 4.6.0
 
