@@ -133,8 +133,9 @@ HOST_GNU_TYPE=$(dpkg-architecture -qDEB_HOST_GNU_TYPE 2>/dev/null || echo "x86_6
 HOST_ARCH=$(dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null || echo "amd64")
 
 # Default pbuilder base tarball for the selected distro.
+# Architecture is embedded in the name to distinguish multi-arch tarballs.
 # TARBALL_DIR defaults to /var/cache/pbuilder but can be overridden with --tarball-dir.
-BASE_BASETGZ="${TARBALL_DIR}/${DISTRO}-base.tgz"
+BASE_BASETGZ="${TARBALL_DIR}/${DISTRO}-${HOST_ARCH}.tgz"
 
 # If a custom suffix is given, point to the customized tarball instead.
 # Architecture is embedded in the name to distinguish multi-arch tarballs.

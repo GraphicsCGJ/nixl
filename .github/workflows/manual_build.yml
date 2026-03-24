@@ -1,0 +1,62 @@
+name: Manual Build and Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      distro:
+        description: 'Target distro'
+        required: true
+        default: 'both'
+        type: choice
+        options: [both, noble, jammy]
+
+jobs:
+  publish-noble:
+    if: ${{ inputs.distro == 'both' || inputs.distro == 'noble' }}
+    runs-on: self-hosted-noble
+    env:
+      APTLY_TOKEN: ${{ secrets.APTLY_TOKEN }}
+      APTLY_URL: ${{ secrets.APTLY_URL }}
+      APTLY_REPO: ${{ secrets.APTLY_REPO_NOBLE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pbuilder devscripts debootstrap
+
+      - name: Build
+        run: sudo ./debian.sh build --tarball-dir ~/pbuilder
+
+      - name: Remove existing packages from Aptly
+        run: ./debian.sh aptly --remove nixl
+
+      - name: Upload to Aptly
+        run: ./debian.sh package --aptly
+
+  publish-jammy:
+    if: ${{ inputs.distro == 'both' || inputs.distro == 'jammy' }}
+    runs-on: self-hosted-medium
+    env:
+      APTLY_TOKEN: ${{ secrets.APTLY_TOKEN }}
+      APTLY_URL: ${{ secrets.APTLY_URL }}
+      APTLY_REPO: ${{ secrets.APTLY_REPO_JAMMY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pbuilder devscripts debootstrap
+
+      - name: Build
+        run: sudo ./debian.sh build --jammy --tarball-dir ~/pbuilder
+
+      - name: Remove existing packages from Aptly
+        run: ./debian.sh aptly --remove nixl --jammy
+
+      - name: Upload to Aptly
+        run: ./debian.sh package --aptly --jammy
